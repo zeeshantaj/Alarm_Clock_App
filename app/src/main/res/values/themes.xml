@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Alaram_Clock_App" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
+    <style name="Theme.Alaram_Clock_App" parent="Base.Theme.Alaram_Clock_App" />
+</resources>
