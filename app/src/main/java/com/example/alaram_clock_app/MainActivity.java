@@ -5,8 +5,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
@@ -14,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.alaram_clock_app.Adapter.AlarmAdapter;
 
+import com.example.alaram_clock_app.BroadCastReceiver.StopAlarmBroadCastReceiver;
 import com.example.alaram_clock_app.database.Alarm_Details;
 import com.example.alaram_clock_app.database.RoomDB;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -93,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
     }
+
     private void setCurrentTime() {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy \n hh:mm:ss a");

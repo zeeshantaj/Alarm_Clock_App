@@ -8,8 +8,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -27,6 +32,8 @@ import android.widget.Toast;
 
 import com.example.alaram_clock_app.BroadCastReceiver.StopAlarmBroadCastReceiver;
 import com.example.alaram_clock_app.Models.Alarm_Time;
+import com.example.alaram_clock_app.Service.AlarmService;
+import com.example.alaram_clock_app.Service.ServiceBroadcast;
 import com.example.alaram_clock_app.database.Alarm_Details;
 import com.example.alaram_clock_app.database.MainDao;
 import com.example.alaram_clock_app.database.RoomDB;
@@ -37,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -58,7 +66,7 @@ public class Set_Alarm_Activity extends AppCompatActivity {
     private Alarm_Details alarm;
     private CardView selectRingTone;
 
-    private static final int REQUEST_PICK_MP3 = 1;
+    BroadcastReceiver stopAlarmReceiver = new StopAlarmBroadCastReceiver();
     private ActivityResultLauncher<String> filePickerLauncher;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +124,7 @@ public class Set_Alarm_Activity extends AppCompatActivity {
                 timeSet = "am";
             }
 
-            String formatted = String.format(Locale.US, "%02d:%02d", hour, minute);
+
             String formatted1 = String.format(Locale.US, "%02d:%02d:%s", hour, minute, timeSet);
             Toast.makeText(this, "Alarm Set SuccessFull" + formatted1, Toast.LENGTH_SHORT).show();
 
@@ -131,24 +139,31 @@ public class Set_Alarm_Activity extends AppCompatActivity {
             System.out.println("details" + alarm.getHour() + alarm.getID() + alarm.getMinute() + alarm.getIsEnabled() + alarm.getRingtone_path() + alarm.getTitle());
             database.mainDao().insert(alarm);
 
-            Intent alarmIntent = new Intent(this, StopAlarmBroadCastReceiver.class);
-            //alarmIntent.setAction("Stop"); // A unique action string
-            alarmIntent.setAction("PLAY_ALARM");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Set_Alarm_Activity.ALARM_SERVICE);
-
-// Calculate the alarm time using the user-set time (hour and minute)
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
             calendar.set(Calendar.MINUTE, timePicker.getMinute());
             calendar.set(Calendar.SECOND, 0);
 
-// Set the alarm using the AlarmManager
+
+            Intent alarmIntent = new Intent(this, ServiceBroadcast.class);
+
+            alarmIntent.setAction("START_ALARM");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Set_Alarm_Activity.ALARM_SERVICE);
+
+
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
-           // startService(alarmIntent);
+
+
+            //alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis()+20000,pendingIntent);
+
+
+            //startService(alarmIntent);
+
+
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
 
@@ -166,6 +181,8 @@ public class Set_Alarm_Activity extends AppCompatActivity {
     }
 
 
+
+
     private void handleSelectedFile(Uri fileUri) {
         // Use the fileUri as needed
         // For example, display the file name to the user
@@ -179,8 +196,10 @@ public class Set_Alarm_Activity extends AppCompatActivity {
            // alarm.setRingtone_path(fileName);
         }
 
+        Intent intent = new Intent();
+        intent.putExtra("ringtoneUri", tone);
 
-        Log.e("MyApp", "tone" + tone);
+        Log.e("MyApp", "tone" + fileUri);
     }
     private String getFileNameFromUri(Uri uri) {
         String displayName = "";
